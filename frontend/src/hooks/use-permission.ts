@@ -13,16 +13,17 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
   manager: [
     // 经理权限
     'strategy:view',
-    'plan:view', 'plan:create', 'plan:edit', 'plan:delete',
-    'task:view', 'task:create', 'task:edit', 'task:delete',
+    'plan:view', 'plan:create', 'plan:edit',  // 不能删除计划
+    'task:view', 'task:create', 'task:edit',  // 不能删除任务
     'issue:view', 'issue:create', 'issue:edit',
     'assessment:view',
     'department:view',
     'user:view',
   ],
   employee: [
-    // 员工权限 - 只能查看和操作自己的任务，不能删除
-    'strategy:view', 'plan:view',
+    // 员工权限 - 只能查看，创建和编辑自己的任务，不能删除任何东西
+    'strategy:view',
+    'plan:view',  // 只能查看计划，不能创建/编辑/删除
     'task:view', 'task:create', 'task:edit',  // 不能删除任务
     'issue:view',
     'assessment:view',

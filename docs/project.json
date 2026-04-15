@@ -3,6 +3,6 @@
   "sub_project_type": "",
   "name": "ACEMATIC运营管理系统",
   "app_slug": "acematic-ops",
-  "version_description": "完成审核工作流重构",
+  "version_description": "修复权限控制问题，完善任务审核工作流",
   "preview_type": "pc"
 }
