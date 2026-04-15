@@ -1,0 +1,120 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "create": "Create",
+    "edit": "Edit",
+    "delete": "Delete",
+    "submit": "Submit",
+    "confirm": "Confirm",
+    "search": "Search",
+    "loading": "Loading...",
+    "success": "Success",
+    "error": "Error",
+    "noData": "No data",
+    "required": "Required"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "alignment": "Strategic Alignment",
+    "strategy": "Strategy Management",
+    "plan": "Plan Management",
+    "tasks": "Task Management",
+    "dailyLog": "Daily Execution",
+    "weeklyReports": "Weekly Reports",
+    "issues": "Issue List",
+    "department": "Department Management",
+    "users": "User Management",
+    "assessment": "Performance",
+    "settings": "Settings"
+  },
+  "login": {
+    "title": "Enterprise Management System",
+    "subtitle": "Enterprise Strategy Execution Platform",
+    "username": "Username",
+    "password": "Password",
+    "rememberMe": "Remember me",
+    "login": "Login",
+    "logging": "Logging in...",
+    "testAccounts": "Test Accounts"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "strategyOverview": "Strategy Overview",
+    "planProgress": "Plan Progress",
+    "taskStats": "Task Statistics",
+    "recentActivity": "Recent Activity"
+  },
+  "strategy": {
+    "title": "Strategy Management",
+    "addStrategy": "Add Strategy",
+    "editStrategy": "Edit Strategy",
+    "strategicGoal": "Strategic Goal"
+  },
+  "plan": {
+    "title": "Plan Management",
+    "addPlan": "Add Plan",
+    "editPlan": "Edit Plan",
+    "workPlan": "Work Plan"
+  },
+  "task": {
+    "title": "Task Management",
+    "addTask": "Add Task",
+    "editTask": "Edit Task",
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed",
+      "blocked": "Blocked"
+    }
+  },
+  "assessment": {
+    "title": "Performance Assessment",
+    "autoCalculate": "Auto Calculate",
+    "manualScore": "Manual Score",
+    "score": "Score",
+    "period": "Period"
+  },
+  "department": {
+    "title": "Department Management",
+    "addDepartment": "Add Department",
+    "editDepartment": "Edit Department",
+    "level1": "Level 1",
+    "level2": "Level 2",
+    "level3": "Level 3"
+  },
+  "user": {
+    "title": "User Management",
+    "addUser": "Add User",
+    "editUser": "Edit User",
+    "name": "Name",
+    "username": "Username",
+    "role": "Role",
+    "position": "Position",
+    "people": "people"
+  },
+  "role": {
+    "ceo": "CEO",
+    "executive": "Executive",
+    "manager": "Manager",
+    "employee": "Employee"
+  },
+  "settings": {
+    "title": "Settings",
+    "permission": "Permissions",
+    "brand": "Branding",
+    "systemName": "System Name",
+    "shortName": "Short Name",
+    "companyName": "Company Name",
+    "welcomeText": "Welcome Text",
+    "primaryColor": "Primary Color",
+    "secondaryColor": "Secondary Color",
+    "logo": "Logo",
+    "favicon": "Favicon",
+    "uploadImage": "Upload Image"
+  },
+  "profile": {
+    "title": "Profile",
+    "changePassword": "Change Password"
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "create": "创建",
+    "edit": "编辑",
+    "delete": "删除",
+    "submit": "提交",
+    "confirm": "确认",
+    "search": "搜索",
+    "loading": "加载中...",
+    "success": "成功",
+    "error": "错误",
+    "noData": "暂无数据",
+    "required": "必填"
+  },
+  "nav": {
+    "dashboard": "数据看板",
+    "alignment": "战略对齐",
+    "strategy": "战略管理",
+    "plan": "计划管理",
+    "tasks": "任务管理",
+    "dailyLog": "每日执行",
+    "weeklyReports": "周报管理",
+    "issues": "问题清单",
+    "department": "部门管理",
+    "users": "人员管理",
+    "assessment": "考核管理",
+    "settings": "系统设置"
+  },
+  "login": {
+    "title": "企业管理系统",
+    "subtitle": "企业战略执行管理平台",
+    "username": "用户名",
+    "password": "密码",
+    "rememberMe": "记住密码",
+    "login": "登录",
+    "logging": "登录中...",
+    "testAccounts": "测试账号"
+  },
+  "dashboard": {
+    "title": "数据看板",
+    "strategyOverview": "战略概览",
+    "planProgress": "计划进度",
+    "taskStats": "任务统计",
+    "recentActivity": "最近动态"
+  },
+  "strategy": {
+    "title": "战略管理",
+    "addStrategy": "新建战略",
+    "editStrategy": "编辑战略",
+    "strategicGoal": "战略目标"
+  },
+  "plan": {
+    "title": "计划管理",
+    "addPlan": "新建计划",
+    "editPlan": "编辑计划",
+    "workPlan": "工作计划"
+  },
+  "task": {
+    "title": "任务管理",
+    "addTask": "新建任务",
+    "editTask": "编辑任务",
+    "status": {
+      "pending": "待开始",
+      "inProgress": "进行中",
+      "completed": "已完成",
+      "blocked": "已阻塞"
+    }
+  },
+  "assessment": {
+    "title": "绩效考核",
+    "autoCalculate": "自动计算绩效",
+    "manualScore": "手动评分",
+    "score": "分数",
+    "period": "考核周期"
+  },
+  "department": {
+    "title": "部门管理",
+    "addDepartment": "新建部门",
+    "editDepartment": "编辑部门",
+    "level1": "一级",
+    "level2": "二级",
+    "level3": "三级"
+  },
+  "user": {
+    "title": "人员管理",
+    "addUser": "新建员工",
+    "editUser": "编辑员工",
+    "name": "姓名",
+    "username": "用户名",
+    "role": "角色",
+    "position": "职位",
+    "people": "人"
+  },
+  "role": {
+    "ceo": "CEO",
+    "executive": "高管",
+    "manager": "经理",
+    "employee": "员工"
+  },
+  "settings": {
+    "title": "系统设置",
+    "permission": "权限管理",
+    "brand": "品牌定制",
+    "systemName": "系统名称",
+    "shortName": "简称",
+    "companyName": "公司名称",
+    "welcomeText": "欢迎语",
+    "primaryColor": "主色调",
+    "secondaryColor": "辅助色",
+    "logo": "Logo",
+    "favicon": "网站图标",
+    "uploadImage": "上传图片"
+  },
+  "profile": {
+    "title": "个人中心",
+    "changePassword": "修改密码"
+  }
+}

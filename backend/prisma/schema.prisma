@@ -1,0 +1,656 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                    String               @id @default(cuid())
+  username              String               @unique
+  password              String
+  name                  String
+  role                  String               @default("employee")  // 保留用于兼容
+  roleId                String?              // 新增：关联角色
+  departmentId          String?
+  position              String?
+  avatar                String?
+  email                 String?              @unique
+  phone                 String?
+  isActive              Boolean              @default(true)
+  lastLoginAt           DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+  roleInfo              Role?                @relation(fields: [roleId], references: [id])
+  achievements          Achievement[]        @relation("UserAchievements")
+  ownerAnnualGoals      AnnualGoal[]         @relation("AnnualGoalOwner")
+  assessedBy            Assessment[]         @relation("AssessmentAssessor")
+  assessments           Assessment[]         @relation("AssessmentUser")
+  dailyLogs             DailyLog[]           @relation("UserDailyLogs")
+  responsibleMeasures   ImprovementMeasure[] @relation("MeasureResponsible")
+  responsibleIssues     Issue[]              @relation("IssueResponsible")
+  hostedMeetings        Meeting[]            @relation("MeetingHost")
+  recordedMeetings      Meeting[]            @relation("MeetingRecorder")
+  meetingAttendees      MeetingAttendee[]
+  submittedMonthlyPlans MonthlyPlan[]        @relation("PlanSubmitter")
+  ownerMonthlyPlans     NewMonthlyPlan[]     @relation("NewMonthlyPlanOwner")
+  ownerWeeklyPlans      NewWeeklyPlan[]      @relation("NewWeeklyPlanOwner")
+  plans                 Plan[]               @relation("PlanOwner")
+  ownerQuarterlyPlans   QuarterlyPlan[]      @relation("QuarterlyPlanOwner")
+  createdStrategies     Strategy[]           @relation("StrategyCreator")
+  submittedStrategies   Strategy[]           @relation("StrategySubmitter")
+  reviewedStrategies    Strategy[]           @relation("StrategyReviewer")
+  submittedPlans        Plan[]               @relation("PlanSubmitter")
+  reviewedPlans         Plan[]               @relation("PlanReviewer")
+  approvedTasks         Task[]               @relation("TaskApprover")
+  tasks                 Task[]               @relation("TaskAssignee")
+  assignedTasks         Task[]               @relation("TaskAssigner")
+  department            Department?          @relation(fields: [departmentId], references: [id])
+  submittedWeeklyPlans  WeeklyPlan[]         @relation("WeeklyPlanSubmitter")
+  submittedReports      WeeklyReport[]       @relation("ReportSubmitter")
+  changeRequests        ChangeRequest[]      @relation("ChangeRequester")
+  reviewedChanges       ChangeRequest[]      @relation("ChangeReviewer")
+  contentVersions       ContentVersion[]     @relation("ContentVersionChanger")
+}
+
+model Department {
+  id              String           @id @default(cuid())
+  name            String
+  parentId        String?
+  managerId       String?
+  description     String?
+  memberCount     Int              @default(0)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  achievements    Achievement[]
+  annualGoals     AnnualGoal[]
+  dailyLogs       DailyLog[]
+  parent          Department?      @relation("DepartmentTree", fields: [parentId], references: [id])
+  children        Department[]     @relation("DepartmentTree")
+  issues          Issue[]
+  monthlyData     MonthlyData[]
+  monthlyPlans    MonthlyPlan[]
+  newMonthlyPlans NewMonthlyPlan[]
+  newWeeklyPlans  NewWeeklyPlan[]
+  plans           Plan[]
+  quarterlyPlans  QuarterlyPlan[]
+  members         User[]
+  weeklyPlans     WeeklyPlan[]
+  weeklyReports   WeeklyReport[]
+}
+
+model Strategy {
+  id             String    @id @default(cuid())
+  title          String
+  description    String?
+  year           Int
+  status         String    @default("draft")  // draft, pending, active, completed, archived
+  progress       Int       @default(0)
+  startDate      DateTime
+  endDate        DateTime
+  createdById    String
+  submittedAt    DateTime?
+  submittedById  String?
+  reviewedAt     DateTime?
+  reviewedById   String?
+  reviewComment  String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  plans          Plan[]
+  createdBy      User      @relation("StrategyCreator", fields: [createdById], references: [id])
+  submittedBy    User?     @relation("StrategySubmitter", fields: [submittedById], references: [id])
+  reviewedBy     User?     @relation("StrategyReviewer", fields: [reviewedById], references: [id])
+  
+  @@index([status])
+  @@index([createdById])
+}
+
+model Plan {
+  id             String       @id @default(cuid())
+  title          String
+  description    String?
+  type           String       @default("department")  // company, department, personal
+  strategyId     String?
+  departmentId   String?
+  ownerId        String
+  status         String       @default("draft")  // draft, pending, active, completed, cancelled
+  progress       Int          @default(0)
+  priority       String       @default("medium")
+  startDate      DateTime
+  endDate        DateTime
+  submittedAt    DateTime?
+  submittedById  String?
+  reviewedAt     DateTime?
+  reviewedById   String?
+  reviewComment  String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  assessments    Assessment[]
+  department     Department?  @relation(fields: [departmentId], references: [id])
+  owner          User         @relation("PlanOwner", fields: [ownerId], references: [id])
+  submittedBy    User?        @relation("PlanSubmitter", fields: [submittedById], references: [id])
+  reviewedBy     User?        @relation("PlanReviewer", fields: [reviewedById], references: [id])
+  strategy       Strategy?    @relation(fields: [strategyId], references: [id])
+  tasks          Task[]
+  
+  @@index([status])
+  @@index([ownerId])
+}
+
+model Task {
+  id                 String                @id @default(cuid())
+  taskNumber         String                @unique @default("T-000000")
+  title              String
+  description        String?
+  sourceType         String                @default("assigned")
+  sourceId           String?
+  sourceRef          String?
+  assigneeId         String?
+  assignerId         String?
+  approverId         String?
+  parentTaskId       String?
+  planId             String?
+  goalId             String?
+  quarterlyPlanId    String?
+  monthlyPlanId      String?
+  weeklyPlanId       String?
+  strategicAlignment Boolean               @default(false)
+  alignmentTarget    String?
+  alignmentScore     Float?                @default(0)
+  dueDate            DateTime
+  priority           String                @default("medium")
+  status             String                @default("pending")
+  progress           Int                   @default(0)
+  confirmedAt        DateTime?
+  confirmedById      String?
+  approvedAt         DateTime?
+  approvalComment    String?
+  completedAt        DateTime?
+  completedById      String?
+  verifyResult       String?
+  verifiedAt         DateTime?
+  verifiedById       String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  approver           User?                 @relation("TaskApprover", fields: [approverId], references: [id])
+  assignee           User?                 @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  assigner           User?                 @relation("TaskAssigner", fields: [assignerId], references: [id])
+  parentTask         Task?                 @relation("TaskTree", fields: [parentTaskId], references: [id])
+  subTasks           Task[]                @relation("TaskTree")
+  plan               Plan?                 @relation(fields: [planId], references: [id])
+  executions         TaskExecutionRecord[]
+  taskExecutions     TaskExecution[]       // 日志中的任务执行记录
+  sources            TaskSource[]
+}
+
+model TaskSource {
+  id           String   @id @default(cuid())
+  taskId       String
+  sourceType   String
+  sourceId     String?
+  sourcePlanId String?
+  sourceGoalId String?
+  createdAt    DateTime @default(now())
+  task         Task     @relation(fields: [taskId], references: [id])
+}
+
+model TaskExecutionRecord {
+  id            String   @id @default(cuid())
+  taskId        String
+  executionDate DateTime
+  workContent   String
+  hoursSpent    Float    @default(0)
+  progress      Int      @default(0)
+  result        String?
+  problems      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  task          Task     @relation(fields: [taskId], references: [id])
+}
+
+model Assessment {
+  id               String    @id @default(cuid())
+  planId           String?
+  userId           String
+  assessorId       String
+  score            Int
+  comment          String?
+  type             String    @default("monthly")
+  period           String
+  autoScore        Float?    @default(0)
+  taskCompleted    Int       @default(0)
+  taskTotal        Int       @default(0)
+  workHoursActual  Float     @default(0)
+  workHoursPlan    Float     @default(0)
+  progressContrib  Float     @default(0)
+  calculatedAt     DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  assessor         User      @relation("AssessmentAssessor", fields: [assessorId], references: [id])
+  plan             Plan?     @relation(fields: [planId], references: [id])
+  user             User      @relation("AssessmentUser", fields: [userId], references: [id])
+}
+
+model WeeklyReport {
+  id               String     @id @default(cuid())
+  weekDate         DateTime
+  departmentId     String
+  submitterId      String
+  completedTasks   String
+  keyData          String
+  nextWeekPlan     String
+  coordinationNeed String?
+  selfEvaluation   String     @default("达成")
+  submitTime       DateTime   @default(now())
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  department       Department @relation(fields: [departmentId], references: [id])
+  submitter        User       @relation("ReportSubmitter", fields: [submitterId], references: [id])
+}
+
+model Issue {
+  id                 String               @id @default(cuid())
+  issueNumber        String               @unique
+  source             String
+  discoveryDate      DateTime
+  departmentId       String
+  description        String
+  issueType          String
+  severity           String               @default("中")
+  responsibleId      String?
+  planCompleteDate   DateTime?
+  actualCompleteDate DateTime?
+  status             String               @default("待处理")
+  solution           String?
+  verifyResult       String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  measures           ImprovementMeasure[]
+  department         Department           @relation(fields: [departmentId], references: [id])
+  responsible        User?                @relation("IssueResponsible", fields: [responsibleId], references: [id])
+}
+
+model Meeting {
+  id              String            @id @default(cuid())
+  meetingName     String
+  meetingType     String
+  meetingTime     DateTime
+  location        String
+  hostId          String
+  recorderId      String
+  content         String
+  resolutions     String
+  nextMeetingDate DateTime?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  host            User              @relation("MeetingHost", fields: [hostId], references: [id])
+  recorder        User              @relation("MeetingRecorder", fields: [recorderId], references: [id])
+  attendees       MeetingAttendee[]
+}
+
+model MeetingAttendee {
+  id        String   @id @default(cuid())
+  meetingId String
+  userId    String
+  createdAt DateTime @default(now())
+  meeting   Meeting  @relation(fields: [meetingId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model MonthlyData {
+  id             String     @id @default(cuid())
+  yearMonth      String
+  departmentId   String
+  indicatorName  String
+  targetValue    Float
+  actualValue    Float
+  achievement    Float      @default(0)
+  lastYearValue  Float?
+  lastMonthValue Float?
+  yearOverYear   Float?
+  monthOverMonth Float?
+  deviation      String?
+  improvement    String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  department     Department @relation(fields: [departmentId], references: [id])
+}
+
+model ImprovementMeasure {
+  id               String   @id @default(cuid())
+  measureNumber    String   @unique
+  issueId          String?
+  description      String
+  responsibleId    String
+  planCompleteDate DateTime
+  progress         Int      @default(0)
+  effectVerify     String?
+  isEffective      String   @default("待验证")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  issue            Issue?   @relation(fields: [issueId], references: [id])
+  responsible      User     @relation("MeasureResponsible", fields: [responsibleId], references: [id])
+}
+
+model AnnualGoal {
+  id              String           @id @default(cuid())
+  year            Int
+  title           String
+  description     String?
+  strategyId      String?
+  departmentId    String?
+  ownerId         String?
+  targetValue     Float            @default(0)
+  currentValue    Float            @default(0)
+  unit            String?
+  startDate       DateTime
+  endDate         DateTime
+  status          String           @default("进行中")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  department      Department?      @relation(fields: [departmentId], references: [id])
+  owner           User?            @relation("AnnualGoalOwner", fields: [ownerId], references: [id])
+  monthlyPlansOld MonthlyPlan[]
+  monthlyPlans    NewMonthlyPlan[]
+  quarterlyPlans  QuarterlyPlan[]
+}
+
+model QuarterlyPlan {
+  id           String           @id @default(cuid())
+  annualGoalId String?
+  title        String
+  description  String?
+  quarter      Int
+  year         Int
+  departmentId String?
+  ownerId      String?
+  targetValue  Float            @default(0)
+  currentValue Float            @default(0)
+  keyResults   String?
+  startDate    DateTime
+  endDate      DateTime
+  status       String           @default("进行中")
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  monthlyPlans NewMonthlyPlan[]
+  annualGoal   AnnualGoal?      @relation(fields: [annualGoalId], references: [id])
+  department   Department?      @relation(fields: [departmentId], references: [id])
+  owner        User?            @relation("QuarterlyPlanOwner", fields: [ownerId], references: [id])
+}
+
+model NewMonthlyPlan {
+  id              String          @id @default(cuid())
+  annualGoalId    String?
+  quarterlyPlanId String?
+  title           String
+  description     String?
+  month           Int
+  year            Int
+  departmentId    String?
+  ownerId         String?
+  targetValue     Float           @default(0)
+  currentValue    Float           @default(0)
+  keyResults      String?
+  status          String          @default("进行中")
+  reviewStatus    String          @default("待提交")
+  reviewComment   String?
+  reviewedBy      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  annualGoal      AnnualGoal?     @relation(fields: [annualGoalId], references: [id])
+  department      Department?     @relation(fields: [departmentId], references: [id])
+  owner           User?           @relation("NewMonthlyPlanOwner", fields: [ownerId], references: [id])
+  quarterlyPlan   QuarterlyPlan?  @relation(fields: [quarterlyPlanId], references: [id])
+  weeklyPlans     NewWeeklyPlan[]
+}
+
+model NewWeeklyPlan {
+  id            String          @id @default(cuid())
+  monthlyPlanId String?
+  title         String
+  description   String?
+  weekNumber    Int
+  startDate     DateTime
+  endDate       DateTime
+  departmentId  String?
+  ownerId       String?
+  targetValue   Float           @default(0)
+  currentValue  Float           @default(0)
+  keyTasks      String?
+  status        String          @default("进行中")
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  dailyLogs     DailyLog[]
+  department    Department?     @relation(fields: [departmentId], references: [id])
+  monthlyPlan   NewMonthlyPlan? @relation(fields: [monthlyPlanId], references: [id])
+  owner         User?           @relation("NewWeeklyPlanOwner", fields: [ownerId], references: [id])
+}
+
+model MonthlyPlan {
+  id            String       @id @default(cuid())
+  yearMonth     String
+  departmentId  String
+  submitterId   String
+  annualGoalId  String?
+  planItems     String
+  totalBudget   Float?
+  reviewStatus  String       @default("待提交")
+  reviewComment String?
+  reviewedBy    String?
+  reviewedAt    DateTime?
+  submitTime    DateTime     @default(now())
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  annualGoal    AnnualGoal?  @relation(fields: [annualGoalId], references: [id])
+  department    Department   @relation(fields: [departmentId], references: [id])
+  submitter     User         @relation("PlanSubmitter", fields: [submitterId], references: [id])
+  weeklyPlans   WeeklyPlan[]
+}
+
+model WeeklyPlan {
+  id             String      @id @default(cuid())
+  weekDate       DateTime
+  monthlyPlanId  String
+  departmentId   String
+  submitterId    String
+  planItems      String
+  completedItems String?
+  progress       Int         @default(0)
+  submitTime     DateTime    @default(now())
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  dailyLogs      DailyLog[]
+  department     Department  @relation(fields: [departmentId], references: [id])
+  monthlyPlan    MonthlyPlan @relation(fields: [monthlyPlanId], references: [id])
+  submitter      User        @relation("WeeklyPlanSubmitter", fields: [submitterId], references: [id])
+}
+
+model DailyLog {
+  id              String          @id @default(cuid())
+  logDate         DateTime
+  weeklyPlanId    String?
+  newWeeklyPlanId String?
+  userId          String
+  departmentId    String
+  workContent     String
+  achievements    String?
+  workHours       Float           @default(8)
+  progress        Int             @default(0)
+  problems        String?
+  nextDayPlan     String?
+  submitTime      DateTime        @default(now())
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  department      Department      @relation(fields: [departmentId], references: [id])
+  newWeeklyPlan   NewWeeklyPlan?  @relation(fields: [newWeeklyPlanId], references: [id])
+  user            User            @relation("UserDailyLogs", fields: [userId], references: [id])
+  weeklyPlan      WeeklyPlan?     @relation(fields: [weeklyPlanId], references: [id])
+  tasks           TaskExecution[]
+}
+
+model TaskExecution {
+  id          String   @id @default(cuid())
+  dailyLogId  String
+  taskId      String?  // 关联真正的任务
+  taskName    String
+  description String?
+  planHours   Float?
+  actualHours Float?
+  status      String   @default("进行中")
+  completion  Int      @default(0)
+  result      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  dailyLog    DailyLog @relation(fields: [dailyLogId], references: [id])
+  task        Task?    @relation(fields: [taskId], references: [id])
+}
+
+model Achievement {
+  id                String     @id @default(cuid())
+  achievementNumber String     @unique
+  title             String
+  description       String
+  departmentId      String
+  userId            String
+  achievementDate   DateTime
+  achievementType   String
+  relatedPlanId     String?
+  relatedTaskId     String?
+  files             String?
+  status            String     @default("待审核")
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  reviewComment     String?
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+  department        Department @relation(fields: [departmentId], references: [id])
+  user              User       @relation("UserAchievements", fields: [userId], references: [id])
+}
+
+model AlignmentStats {
+  id              String   @id @default(cuid())
+  userId          String?
+  departmentId    String?
+  period          String
+  totalTasks      Int      @default(0)
+  alignedTasks    Int      @default(0)
+  alignmentRate   Float    @default(0)
+  unalignedReason String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ========== 权限系统 ==========
+model Permission {
+  id          String   @id @default(cuid())
+  code        String   @unique  // 如: dashboard:view, strategy:edit
+  name        String             // 如: 查看看板, 编辑战略
+  module      String             // 模块: dashboard, strategy, plan, task, etc.
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  roles       RolePermission[]
+}
+
+// ========== 角色管理 ==========
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique  // 角色标识：ceo, executive, manager, employee, custom_role
+  label       String            // 显示名称：CEO, 高管, 经理, 员工
+  description String?
+  isSystem    Boolean  @default(false)  // 是否系统内置角色（不可删除）
+  level       Int      @default(0)      // 角色级别：0=最高，数字越大权限越低
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  permissions RolePermission[]
+  users       User[]
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  
+  @@unique([roleId, permissionId])
+}
+
+// ========== 系统配置 ==========
+model SystemConfig {
+  id            String   @id @default(cuid())
+  key           String   @unique
+  value         String   // JSON格式存储复杂配置
+  description   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ========== 系统品牌配置 ==========
+model BrandConfig {
+  id              String   @id @default(cuid())
+  systemName      String   @default("企业管理系统")
+  shortName       String   @default("系统")
+  pageTitle       String?  // 浏览器标签标题
+  logoUrl         String?
+  faviconUrl      String?
+  primaryColor    String   @default("#7c3aed")  // 主色调
+  secondaryColor  String   @default("#3b82f6")  // 辅助色
+  companyName     String?
+  companyAddress  String?
+  companyPhone    String?
+  companyEmail    String?
+  icpRecord       String?  // ICP备案号
+  copyright       String?
+  loginBackground String?
+  welcomeText     String?  @default("欢迎使用企业管理系统")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+// ========== 变更申请 ==========
+model ChangeRequest {
+  id              String   @id @default(cuid())
+  entityType      String   // strategy, plan, task
+  entityId        String   // 关联的实体ID
+  requestType     String   // modify, cancel
+  requesterId     String   // 申请人ID
+  reason          String   // 变更原因
+  oldData         String   // JSON: 变更前的数据
+  newData         String   // JSON: 变更后的数据
+  status          String   @default("pending") // pending, approved, rejected
+  reviewerId      String?  // 审核人ID
+  reviewComment   String?  // 审核意见
+  reviewedAt      DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  requester       User     @relation("ChangeRequester", fields: [requesterId], references: [id])
+  reviewer        User?    @relation("ChangeReviewer", fields: [reviewerId], references: [id])
+  
+  @@index([entityType, entityId])
+  @@index([requesterId])
+  @@index([status])
+}
+
+// ========== 内容版本历史 ==========
+model ContentVersion {
+  id            String   @id @default(cuid())
+  entityType    String   // strategy, plan, task
+  entityId      String   // 实体ID
+  version       Int      @default(1)
+  data          String   // JSON: 该版本的完整数据
+  changedBy     String   // 修改人ID
+  changeReason  String?  // 变更原因
+  changeRequestId String? // 关联的变更申请ID
+  createdAt     DateTime @default(now())
+  
+  changer       User     @relation("ContentVersionChanger", fields: [changedBy], references: [id])
+  
+  @@unique([entityType, entityId, version])
+  @@index([entityType, entityId])
+}
