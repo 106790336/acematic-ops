@@ -47,6 +47,9 @@ model User {
   approvedTasks         Task[]               @relation("TaskApprover")
   tasks                 Task[]               @relation("TaskAssignee")
   assignedTasks         Task[]               @relation("TaskAssigner")
+  createdTasks          Task[]               @relation("TaskCreator")
+  submittedTasks        Task[]               @relation("TaskSubmitter")
+  reviewedTasks         Task[]               @relation("TaskReviewer")
   department            Department?          @relation(fields: [departmentId], references: [id])
   submittedWeeklyPlans  WeeklyPlan[]         @relation("WeeklyPlanSubmitter")
   submittedReports      WeeklyReport[]       @relation("ReportSubmitter")
@@ -159,10 +162,16 @@ model Task {
   strategicAlignment Boolean               @default(false)
   alignmentTarget    String?
   alignmentScore     Float?                @default(0)
-  dueDate            DateTime
+  dueDate            DateTime?
   priority           String                @default("medium")
-  status             String                @default("pending")
+  status             String                @default("draft")
   progress           Int                   @default(0)
+  createdById        String?
+  submittedAt        DateTime?
+  submittedById      String?
+  reviewedAt         DateTime?
+  reviewedById       String?
+  reviewComment      String?
   confirmedAt        DateTime?
   confirmedById      String?
   approvedAt         DateTime?
@@ -177,12 +186,19 @@ model Task {
   approver           User?                 @relation("TaskApprover", fields: [approverId], references: [id])
   assignee           User?                 @relation("TaskAssignee", fields: [assigneeId], references: [id])
   assigner           User?                 @relation("TaskAssigner", fields: [assignerId], references: [id])
+  createdBy          User?                 @relation("TaskCreator", fields: [createdById], references: [id])
+  submittedBy        User?                 @relation("TaskSubmitter", fields: [submittedById], references: [id])
+  reviewedBy         User?                 @relation("TaskReviewer", fields: [reviewedById], references: [id])
   parentTask         Task?                 @relation("TaskTree", fields: [parentTaskId], references: [id])
   subTasks           Task[]                @relation("TaskTree")
   plan               Plan?                 @relation(fields: [planId], references: [id])
   executions         TaskExecutionRecord[]
   taskExecutions     TaskExecution[]       // 日志中的任务执行记录
   sources            TaskSource[]
+  
+  @@index([status])
+  @@index([createdById])
+  @@index([assigneeId])
 }
 
 model TaskSource {

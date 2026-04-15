@@ -9,9 +9,9 @@ export const PlanType = z.enum(['company', 'department', 'personal']);
 export type PlanTypeType = z.infer<typeof PlanType>;
 
 // 状态枚举
-export const StrategyStatus = z.enum(['draft', 'active', 'completed', 'archived']);
-export const PlanStatus = z.enum(['pending', 'in_progress', 'completed', 'cancelled']);
-export const TaskStatus = z.enum(['pending', 'in_progress', 'completed', 'cancelled']);
+export const StrategyStatus = z.enum(['draft', 'pending', 'active', 'completed', 'archived']);
+export const PlanStatus = z.enum(['draft', 'pending', 'active', 'completed', 'cancelled']);
+export const TaskStatus = z.enum(['draft', 'pending', 'active', 'in_progress', 'completed', 'verified', 'cancelled']);
 
 // 优先级枚举
 export const Priority = z.enum(['high', 'medium', 'low']);
@@ -156,15 +156,20 @@ export const TaskSchema = z.object({
 });
 
 export const CreateTaskSchema = z.object({
-  planId: z.string(),
-  title: z.string().min(2).max(200),
+  title: z.string().min(2, "任务标题至少2个字符").max(200),
   description: z.string().optional(),
-  assigneeId: z.string().optional(),
-  dueDate: z.string().transform(val => new Date(val)),
+  planId: z.string().optional(),  // 可选，不强制关联计划
+  assigneeId: z.string().optional(),  // 可选，默认分配给自己
+  dueDate: z.string().optional(),  // 可选
   priority: Priority.default('medium'),
 });
 
-export const UpdateTaskSchema = CreateTaskSchema.partial().omit({ planId: true }).extend({
+export const UpdateTaskSchema = z.object({
+  title: z.string().min(2).max(200).optional(),
+  description: z.string().optional(),
+  assigneeId: z.string().optional(),
+  dueDate: z.string().optional(),
+  priority: Priority.optional(),
   status: TaskStatus.optional(),
   progress: z.number().min(0).max(100).optional(),
 });
